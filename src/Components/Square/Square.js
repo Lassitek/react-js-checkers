@@ -22,7 +22,23 @@ class Square extends React.Component{
      
      return(
        <>
-         <rect data-id={this.props.id} className={'rect ' + this.props.colorClass} width={this.props.width} height={this.props.height} x={this.props.x} y={this.props.y} centerX={sqCenterX} centerY={sqCenterY} data-piece={this.props.sqPiece} data-pieceId={this.props.sqPiece.id} data-color={this.props.colorClass} data-pieceColor={this.props.sqPiece.color} data-row={this.props.gameState.board.squares[this.props.id -1].row} data-col={this.props.gameState.board.squares[this.props.id -1].col} data-isEmpty={this.props.isEmpty} />
+         <rect 
+           data-id={this.props.id} 
+           className={'rect ' + this.props.colorClass} 
+           width={this.props.width} 
+           height={this.props.height} 
+           x={this.props.x} 
+           y={this.props.y} 
+           data-centerx={sqCenterX} 
+           data-centery={sqCenterY} 
+           data-piece={this.props.sqPiece} 
+           data-pieceid={this.props.sqPiece.id} 
+           data-color={this.props.colorClass} 
+           data-piececolor={this.props.sqPiece.color} 
+           data-row={this.props.gameState.board.squares[this.props.id -1].row} 
+           data-col={this.props.gameState.board.squares[this.props.id -1].col} 
+           data-isempty={this.props.isEmpty} 
+         />
          {sqContent}
        </>
      )

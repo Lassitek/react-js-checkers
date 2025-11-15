@@ -65,21 +65,21 @@ class Board extends React.Component{
     }      
     
     render(){
-      let boardStyle = {
-        maxWidth: '600px',
-        maxHeight: '600px'
-      }
-      
-      return(
-        <div id="board">
-          <svg className="board" viewBox={`0 0 ${this.props.width} ${this.props.height}`} preserveAspectRatio="none meet" style={boardStyle}>
-            {this.props.gameState.board.squares.map((sq, i) => {
-              return <Square id={sq.id} colorClass={sq.sqColor} x={sq.x} y={sq.y} width={sq.width} height={sq.height} sqPiece={sq.piece} isEmpty={sq.isEmpty} gameState={this.props.gameState} updateGame={this.props.updateGame} canMoveTo={this.props.canMoveTo}/>
-            })}
-          </svg>
-        </div>
-      )
-    }
+  let boardStyle = {
+    maxWidth: '600px',
+    maxHeight: '600px'
+  }
+  
+  return(
+    <div id="board">
+      <svg className="board" viewBox={`0 0 ${this.props.width} ${this.props.height}`} preserveAspectRatio="none meet" style={boardStyle}>
+        {this.props.gameState.board.squares.map((sq, i) => {
+          return <Square key={sq.id} id={sq.id} colorClass={sq.sqColor} x={sq.x} y={sq.y} width={sq.width} height={sq.height} sqPiece={sq.piece} isEmpty={sq.isEmpty} gameState={this.props.gameState} updateGame={this.props.updateGame} canMoveTo={this.props.canMoveTo}/>
+        })}
+      </svg>
+    </div>
+  )
+}
 }
 
 export default Board;  

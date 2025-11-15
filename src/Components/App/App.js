@@ -119,191 +119,132 @@ class App extends React.Component {
   
   // returns array of square id objects that the piece can move to
   canMoveTo(currentSquareState, initialCheck){
-    let boardState = Object.assign({}, this.state.board);
-    let currentSquareObj = Object.assign({}, currentSquareState);
-    let canMoveToSquares = [];
-    let opponentColor = this.state.whosTurn == 'player1' ? 'black' : 'red';
-    let activePlayerColor = this.state.whosTurn == 'player1' ? 'red' : 'black';
-    let stopLoop;
-    let direction;
-    let pawnMovement = {
-      red: {
-        upLeft: [-1, -1],
-        upRight: [-1, 1],
-      },
-      black: {
-        downLeft: [1, -1],
-        downRight: [1, 1],
-      } 
-    };
-    let kingMovement = {
-        upLeft: [[-1, -1], [-2, -2], [-3, -3], [-4, -4], [-5, -5], [-6, -6], [-7, -7]],
-        upRight: [[-1, 1], [-2, 2], [-3, 3], [-4, 4], [-5, 5], [-6, 6], [-7, 7]],
-        downLeft: [[1, -1], [2, -2], [3, -3], [4, -4], [5, -5], [6, -6], [7, -7]],
-        downRight: [[1, 1], [2, 2], [3, 3], [4, 4], [5, 5], [6, 6], [7, 7]],
-    };
-    
-    //currentSquareState.piece.type = 'king';
-    
-    if (currentSquareState.piece.color == activePlayerColor){
-      if (currentSquareState.piece.type == 'pawn'){
-        for (let props in pawnMovement[currentSquareObj.piece.color]){
-          d3.selectAll('.rect').each(function(d, i){
-            // if row and column # matches
-            if (this.getAttribute('data-row') == (currentSquareObj.row + pawnMovement[currentSquareObj.piece.color][props][0]) && this.getAttribute('data-col') == (currentSquareObj.col + pawnMovement[currentSquareObj.piece.color][props][1])){
-              // if square is empty, add square to canMoveToSquares
-              if (this.getAttribute('data-isEmpty') == 'true'){
-                canMoveToSquares.push({sqId: this.getAttribute('data-id'), jumpedPiece: 'none'});
-              
-                if (initialCheck){
+  let boardState = Object.assign({}, this.state.board);
+  let currentSquareObj = Object.assign({}, currentSquareState);
+  let canMoveToSquares = [];
+  let opponentColor = this.state.whosTurn == 'player1' ? 'black' : 'red';
+  let activePlayerColor = this.state.whosTurn == 'player1' ? 'red' : 'black';
+  let stopLoop;
+  let direction;
+  let pawnMovement = {
+    red: {
+      upLeft: [-1, -1],
+      upRight: [-1, 1],
+    },
+    black: {
+      downLeft: [1, -1],
+      downRight: [1, 1],
+    } 
+  };
+  let kingMovement = {
+      upLeft: [[-1, -1], [-2, -2], [-3, -3], [-4, -4], [-5, -5], [-6, -6], [-7, -7]],
+      upRight: [[-1, 1], [-2, 2], [-3, 3], [-4, 4], [-5, 5], [-6, 6], [-7, 7]],
+      downLeft: [[1, -1], [2, -2], [3, -3], [4, -4], [5, -5], [6, -6], [7, -7]],
+      downRight: [[1, 1], [2, 2], [3, 3], [4, 4], [5, 5], [6, 6], [7, 7]],
+  };
+  
+  if (currentSquareState.piece.color == activePlayerColor){
+    if (currentSquareState.piece.type == 'pawn'){
+      for (let props in pawnMovement[currentSquareObj.piece.color]){
+        d3.selectAll('.rect').each(function(d, i){
+          if (this.getAttribute('data-row') == (currentSquareObj.row + pawnMovement[currentSquareObj.piece.color][props][0]) && this.getAttribute('data-col') == (currentSquareObj.col + pawnMovement[currentSquareObj.piece.color][props][1])){
+            if (this.getAttribute('data-isempty') == 'true'){
+              canMoveToSquares.push({sqId: this.getAttribute('data-id'), jumpedPiece: 'none'});
+            
+              if (initialCheck){
+              }
+              else{
+                this.classList.add('highlight_sq');
+              }
+            }
+            else{ 
+              direction = props;
+              checkForJumps(this, 'pawn', direction, []);   
+            }
+          }
+        });
+      }
+    }
+    else if (currentSquareState.piece.type == 'king'){
+      for (let props in kingMovement){
+        stopLoop = 'no';
+          
+        for (let i = 0; i < kingMovement[props].length; i++){
+          if (stopLoop == 'no'){
+            d3.selectAll('.rect').each(function(){
+              if (this.getAttribute('data-row') == (currentSquareObj.row + kingMovement[props][i][0]) && this.getAttribute('data-col') == (currentSquareObj.col + kingMovement[props][i][1])){
+                if (this.getAttribute('data-isempty') == 'true'){
+                  canMoveToSquares.push({sqId: this.getAttribute('data-id'), jumpedPiece: 'none'});
+                  
+                  if(initialCheck){
+                  }
+                  else{
+                    this.classList.add('highlight_sq');
+                  }
                 }
                 else{
-                  this.classList.add('highlight_sq');
-                  //this.style.fill = 'lightblue';
-                  //this.style.opacity = 0.7;
+                  direction = props;
+                  checkForJumps(this, 'king', direction, []);
+                  stopLoop = 'yes';
                 }
-              }
-              // if square isn't empty, check if piece can be jumped
-              else{ 
-                direction = props;
-                checkForJumps(this, 'pawn', direction, []);   
-              }
-            }
-          });
-        }
-      }
-      else if (currentSquareState.piece.type == 'king'){
-        for (let props in kingMovement){
-          stopLoop = 'no';
-            
-          for (let i = 0; i < kingMovement[props].length; i++){
-            if (stopLoop == 'no'){
-              d3.selectAll('.rect').each(function(){
-                // if row and column # matches
-                if (this.getAttribute('data-row') == (currentSquareObj.row + kingMovement[props][i][0]) && this.getAttribute('data-col') == (currentSquareObj.col + kingMovement[props][i][1])){
-                  // if square is empty
-                  if (this.getAttribute('data-isEmpty') == 'true'){
-                    canMoveToSquares.push({sqId: this.getAttribute('data-id'), jumpedPiece: 'none'});
-                    
-                    if(initialCheck){
-                    }
-                    else{
-                      this.classList.add('highlight_sq');
-                      //this.style.fill = 'lightblue';
-                      //this.style.opacity = 0.7;
-                    }
-                  }
-                  // if square isn't empty, check if piece can be jumped
-                  else{
-                    direction = props;
-                    checkForJumps(this, 'king', direction, []);
-                    stopLoop = 'yes';
-                  }
-                } 
-              })
-            }
+              } 
+            })
           }
         }
       }
     }
-      
-    function checkForJumps(squareToJump, type, direction, _jumpedPieces){
-      let moves;
-      let addSubCol;
-      let upOrDown;
-      let nextSqToJump;
-      let nextJumpDirection;
-      let jumpedPieces = _jumpedPieces.slice(0);
-      
-      switch(direction){
-            case 'upLeft':
-              moves = [[-1, 1], [1, -1], [-1, -1]];
-              addSubCol = -1;
-              upOrDown = -1;
-              break;
-            case 'upRight': 
-              moves = [[1, 1], [-1, 1], [-1, -1]];
-              addSubCol = 1;
-              upOrDown = -1;
-              break;
-            case 'downLeft':
-              moves = [[1, -1], [1, 1], [-1, -1]];
-              addSubCol = -1;
-              upOrDown = 1;
-              break;
-            case 'downRight':
-              moves = [[-1, 1], [1, -1], [1, 1]];
-              addSubCol = 1;
-              upOrDown = 1;
-              break;
-      }
-      
-      if (type == 'pawn'){
-        if(squareToJump.getAttribute('data-pieceColor') == opponentColor){
-          d3.selectAll('.rect[data-row="' + (parseInt(squareToJump.getAttribute('data-row')) + upOrDown) + '"][data-col="' + (parseInt(squareToJump.getAttribute('data-col')) + addSubCol) + '"]')
-            .each(function(){
-              // if square is empty
-              if (this.getAttribute('data-isEmpty') == 'true'){
-                jumpedPieces.push(squareToJump.getAttribute('data-pieceId'));
-                canMoveToSquares.push({sqId: this.getAttribute('data-id'), jumpedPieceIds: jumpedPieces});
-                
-                if(initialCheck){
-                }
-                else{
-                  this.classList.add('highlight_sq');
-                  //this.style.fill = 'lightblue';
-                  //this.style.opacity = 0.7;
-                }
-                
-                for (let i = 0; i < moves.length; i++){
-                  nextSqToJump = document.querySelector(`.rect[data-row='${(parseInt(this.getAttribute('data-row')) + moves[i][0])}'][data-col='${(parseInt(this.getAttribute('data-col')) + moves[i][1])}']`);
-                  
-                  if (nextSqToJump){
-                    switch(JSON.stringify(moves[i])){
-                      case '[1,1]':
-                        nextJumpDirection = 'downRight';
-                        break;
-                      case '[-1,-1]': 
-                        nextJumpDirection = 'upLeft';
-                        break;
-                      case '[1,-1]':
-                        nextJumpDirection = 'downLeft';
-                        break;
-                      case '[-1,1]':
-                        nextJumpDirection = 'upRight';
-                        break;
-                    }
-                    
-                    checkForJumps(nextSqToJump, 'pawn', nextJumpDirection, jumpedPieces);
-                  }
-                }
-              }
-          });
-        }
-      }
-      else if (type == 'king'){
-        if(squareToJump.getAttribute('data-pieceColor') == opponentColor){
-          d3.selectAll('.rect[data-row="' + (parseInt(squareToJump.getAttribute('data-row')) + upOrDown) + '"][data-col="' + (parseInt(squareToJump.getAttribute('data-col')) + addSubCol) + '"]')
+  }
+    
+  function checkForJumps(squareToJump, type, direction, _jumpedPieces){
+    let moves;
+    let addSubCol;
+    let upOrDown;
+    let nextSqToJump;
+    let nextJumpDirection;
+    let jumpedPieces = _jumpedPieces.slice(0);
+    
+    switch(direction){
+          case 'upLeft':
+            moves = [[-1, 1], [1, -1], [-1, -1]];
+            addSubCol = -1;
+            upOrDown = -1;
+            break;
+          case 'upRight': 
+            moves = [[1, 1], [-1, 1], [-1, -1]];
+            addSubCol = 1;
+            upOrDown = -1;
+            break;
+          case 'downLeft':
+            moves = [[1, -1], [1, 1], [-1, -1]];
+            addSubCol = -1;
+            upOrDown = 1;
+            break;
+          case 'downRight':
+            moves = [[-1, 1], [1, -1], [1, 1]];
+            addSubCol = 1;
+            upOrDown = 1;
+            break;
+    }
+    
+    if (type == 'pawn'){
+      if(squareToJump.getAttribute('data-piececolor') == opponentColor){
+        d3.selectAll('.rect[data-row="' + (parseInt(squareToJump.getAttribute('data-row')) + upOrDown) + '"][data-col="' + (parseInt(squareToJump.getAttribute('data-col')) + addSubCol) + '"]')
           .each(function(){
-            // if square is empty
-            if (this.getAttribute('data-isEmpty') == 'true'){ 
-
-              jumpedPieces.push(squareToJump.getAttribute('data-pieceId'));
+            if (this.getAttribute('data-isempty') == 'true'){
+              jumpedPieces.push(squareToJump.getAttribute('data-pieceid'));
               canMoveToSquares.push({sqId: this.getAttribute('data-id'), jumpedPieceIds: jumpedPieces});
               
-              if(initialCheck){     
+              if(initialCheck){
               }
               else{
                 this.classList.add('highlight_sq');
-                //this.style.fill = 'lightblue';
-                //this.style.opacity = 0.7;
               }
-
+              
               for (let i = 0; i < moves.length; i++){
                 nextSqToJump = document.querySelector(`.rect[data-row='${(parseInt(this.getAttribute('data-row')) + moves[i][0])}'][data-col='${(parseInt(this.getAttribute('data-col')) + moves[i][1])}']`);
-               
+                
                 if (nextSqToJump){
-                   switch(JSON.stringify(moves[i])){
+                  switch(JSON.stringify(moves[i])){
                     case '[1,1]':
                       nextJumpDirection = 'downRight';
                       break;
@@ -316,26 +257,67 @@ class App extends React.Component {
                     case '[-1,1]':
                       nextJumpDirection = 'upRight';
                       break;
-                   }
-
-                   checkForJumps(nextSqToJump, 'king', nextJumpDirection, jumpedPieces);
+                  }
                   
+                  checkForJumps(nextSqToJump, 'pawn', nextJumpDirection, jumpedPieces);
                 }
               }
             }
-          });
-        }
+        });
       }
     }
-    if(initialCheck){              
+    else if (type == 'king'){
+      if(squareToJump.getAttribute('data-piececolor') == opponentColor){
+        d3.selectAll('.rect[data-row="' + (parseInt(squareToJump.getAttribute('data-row')) + upOrDown) + '"][data-col="' + (parseInt(squareToJump.getAttribute('data-col')) + addSubCol) + '"]')
+        .each(function(){
+          if (this.getAttribute('data-isempty') == 'true'){ 
+
+            jumpedPieces.push(squareToJump.getAttribute('data-pieceid'));
+            canMoveToSquares.push({sqId: this.getAttribute('data-id'), jumpedPieceIds: jumpedPieces});
+            
+            if(initialCheck){     
+            }
+            else{
+              this.classList.add('highlight_sq');
+            }
+
+            for (let i = 0; i < moves.length; i++){
+              nextSqToJump = document.querySelector(`.rect[data-row='${(parseInt(this.getAttribute('data-row')) + moves[i][0])}'][data-col='${(parseInt(this.getAttribute('data-col')) + moves[i][1])}']`);
+             
+              if (nextSqToJump){
+                 switch(JSON.stringify(moves[i])){
+                  case '[1,1]':
+                    nextJumpDirection = 'downRight';
+                    break;
+                  case '[-1,-1]': 
+                    nextJumpDirection = 'upLeft';
+                    break;
+                  case '[1,-1]':
+                    nextJumpDirection = 'downLeft';
+                    break;
+                  case '[-1,1]':
+                    nextJumpDirection = 'upRight';
+                    break;
+                 }
+
+                 checkForJumps(nextSqToJump, 'king', nextJumpDirection, jumpedPieces);
+                
+              }
+            }
+          }
+        });
+      }
     }
-    else{
-      console.log('canMoveToSquares');
-      console.log(canMoveToSquares);
-    }
- 
-    return canMoveToSquares;
   }
+  if(initialCheck){              
+  }
+  else{
+    console.log('canMoveToSquares');
+    console.log(canMoveToSquares);
+  }
+
+  return canMoveToSquares;
+}
   
   componentDidUpdate(){
     if (this.state.checkGameOver == true && this.state.gameOver == false){
